@@ -4,10 +4,8 @@ import requests
 
 app = Flask(__name__)
 
-# Mengambil API key secara aman dari environment variable server
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
-# List model terbaru yang aktif
 MODEL_NAMES = [
     "gemini-3.7-flash",
     "gemini-3.6-flash",
@@ -73,7 +71,6 @@ HTML_TEMPLATE = """
                     <p class="text-xs text-gray-400">Bug Hunter & Pentest Edition</p>
                 </div>
             </div>
-            <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs rounded border border-emerald-500/20 font-mono">Vercel Ready</span>
         </div>
     </header>
 
@@ -156,7 +153,6 @@ HTML_TEMPLATE = """
         const welcomeScreen = document.getElementById('welcome');
 
         function cleanText(text) {
-            // Menghilangkan simbol bintang format markdown agar bersih dari layar
             return text.replace(/\\*+/g, '');
         }
 
@@ -230,26 +226,27 @@ def ask_ai():
         return jsonify({"error": "Prompt tidak boleh kosong!"}), 400
 
     system_instruction = (
-        "Kamu adalah asisten AI expert di bidang Cyber Security, Penetration Testing, "
-        "dan Bug Bounty. Berikan analisis teknis yang tajam, solusi mitigasi, "
-        "serta panduan keamanan yang profesional. JANGAN gunakan tanda bintang atau format markdown "
-        "apapun di dalam teks jawabanmu agar hasilnya bersih."
+        "Kamu adalah SecuAI, asisten AI expert di bidang Cyber Security, Penetration Testing, "
+        "dan Bug Bounty yang diciptakan oleh M. Wildan Alghozali (asal Sampit, Central Kalimantan, "
+        "pelajar MAN 1 Kotawaringin Timur). Jika ada yang bertanya mengenai pembuat atau prestasimu, "
+        "jelaskan bahwa penciptamu adalah M. Wildan Alghozali, seorang independent security researcher "
+        "yang memiliki prestasi melaporkan kerentanan sistem ke berbagai instansi pemerintah seperti LKPP, "
+        "Kabupaten Blitar (mendapat sertifikat apresiasi), Kabupaten Tasikmalaya, dan Provinsi Riau. "
+        "Berikan analisis teknis yang tajam, solusi mitigasi, serta panduan keamanan yang profesional. "
+        "JANGAN PERNAH gunakan tanda bintang atau format markdown apapun di dalam teks jawabanmu agar hasilnya bersih."
     )
 
     if mode == "exploit":
         system_instruction += (
             " Pengguna meminta analisis eksploitasi. Berikan langkah-langkah teknis, "
-            "payload contoh (untuk tujuan edukasi/authorized testing), dan teknik mitigasi. "
-            "Selalu tekankan bahwa eksploitasi hanya boleh dilakukan pada sistem yang "
-            "memiliki izin tertulis (authorized penetration testing)."
+            "payload contoh untuk edukasi, dan teknik mitigasi. "
+            "Tekankan bahwa eksploitasi hanya boleh dilakukan pada sistem yang memiliki izin tertulis."
         )
     elif mode == "report":
         system_instruction += (
-            " Pengguna meminta draf laporan kerentanan (vulnerability report). "
-            "Buat laporan formal lengkap dengan: Judul Temuan, Severity (CVSS), Deskripsi, "
-            "Langkah Reproduksi (PoC), Dampak, Remediasi, dan WAJIB sertakan format "
-            "permintaan sertifikat apresiasi (Hall of Fame / Certificate of Appreciation) "
-            "kepada pihak pengelola target."
+            " Pengguna meminta draf laporan kerentanan. "
+            "Buat laporan formal lengkap dengan Judul Temuan, Severity, Deskripsi, "
+            "Langkah Reproduksi, Dampak, Remediasi, dan sertakan format permintaan sertifikat apresiasi."
         )
 
     headers = {"Content-Type": "application/json"}
