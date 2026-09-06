@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 # Mengambil API key secara aman dari environment variable server
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-# List model yang akan dicoba secara berurutan
+
 # List model terbaru yang aktif
 MODEL_NAMES = [
     "gemini-3.7-flash",
@@ -73,7 +73,7 @@ HTML_TEMPLATE = """
                     <p class="text-xs text-gray-400">Bug Hunter & Pentest Edition</p>
                 </div>
             </div>
-            <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs rounded border border-emerald-500/20 font-mono">Linux Mint Ready</span>
+            <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs rounded border border-emerald-500/20 font-mono">Vercel Ready</span>
         </div>
     </header>
 
@@ -155,16 +155,23 @@ HTML_TEMPLATE = """
         const typingIndicator = document.getElementById('typing');
         const welcomeScreen = document.getElementById('welcome');
 
+        function cleanText(text) {
+            // Menghilangkan simbol bintang format markdown agar bersih dari layar
+            return text.replace(/\\*+/g, '');
+        }
+
         function appendMessage(sender, text) {
             welcomeScreen.style.display = 'none';
             const isUser = sender === 'user';
             const div = document.createElement('div');
             div.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
             
+            const processedText = isUser ? text : cleanText(text);
+
             div.innerHTML = `
                 <div class="max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${isUser ? 'bg-emerald-600 text-white rounded-tr-sm' : 'glass text-gray-200 rounded-tl-sm border border-gray-700/50'}">
                     <div class="font-bold text-xs opacity-75 mb-1">${isUser ? 'Wildan' : 'SecuAI Cyber Assistant'}</div>
-                    <div class="whitespace-pre-wrap">${escapeHtml(text)}</div>
+                    <div class="whitespace-pre-wrap">${escapeHtml(processedText)}</div>
                 </div>
             `;
             chatMessages.appendChild(div);
@@ -201,7 +208,7 @@ HTML_TEMPLATE = """
                 }
             } catch (err) {
                 typingIndicator.classList.add('hidden');
-                appendMessage('ai', 'Gagal terhubung ke server backend Flask.');
+                appendMessage('ai', 'Gagal terhubung ke server backend.');
             }
         });
     </script>
@@ -225,7 +232,8 @@ def ask_ai():
     system_instruction = (
         "Kamu adalah asisten AI expert di bidang Cyber Security, Penetration Testing, "
         "dan Bug Bounty. Berikan analisis teknis yang tajam, solusi mitigasi, "
-        "serta panduan keamanan yang profesional."
+        "serta panduan keamanan yang profesional. JANGAN gunakan tanda bintang atau format markdown "
+        "apapun di dalam teks jawabanmu agar hasilnya bersih."
     )
 
     if mode == "exploit":
@@ -257,7 +265,6 @@ def ask_ai():
 
     last_error = None
     
-    # Coba setiap model sampai ada yang berhasil
     for model_name in MODEL_NAMES:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
         
@@ -270,15 +277,12 @@ def ask_ai():
                 return jsonify({"response": ai_reply, "model_used": model_name})
             else:
                 last_error = res_data.get("error", {}).get("message", f"Unknown error with {model_name}")
-                print(f"Model {model_name} failed: {last_error}")
-                continue  
+                continue    
                 
         except Exception as e:
             last_error = str(e)
-            print(f"Model {model_name} error: {last_error}")
-            continue  
+            continue    
 
-    # Kalau semua model gagal
     return jsonify({
         "error": f"Semua model gagal. Error terakhir: {last_error}."
     }), 500
