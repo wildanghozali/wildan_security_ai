@@ -7,8 +7,8 @@ app = Flask(__name__)
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 MODEL_NAMES = [
-    "models/gemini-3.6-flash",
-    "models/gemini-2.5-flash",
+    "gemini-2.5-flash",
+    "gemini-1.5-flash",
 ]
 
 HTML_TEMPLATE = """
@@ -80,7 +80,7 @@ HTML_TEMPLATE = """
             <div class="w-16 h-16 bg-gray-900 rounded-2xl mx-auto flex items-center justify-center mb-4 border border-gray-800 shadow-lg">
                 <i class="fas fa-terminal text-2xl text-emerald-400"></i>
             </div>
-            <h2 class="text-2xl font-bold mb-2">Halo, Siap Berburu Bug Hari Ini?</h2>
+            <h2 class="text-2xl font-bold mb-2">Halo wildan aku siap menjadi asisten Cyber security mu</h2>
             <p class="text-gray-400 max-w-md mx-auto mb-6 text-sm">
                 Pilih mode kerja di bawah atau langsung ketik pertanyaan teknis keamanan siber, analisis payload, dan draf laporanmu.
             </p>
@@ -324,13 +324,18 @@ def ask_ai():
         
         try:
             response = requests.post(url, json=payload, headers=headers, timeout=45)
-            res_data = response.json()
+            
+            try:
+                res_data = response.json()
+            except Exception:
+                last_error = f"HTTP {response.status_code}: {response.text[:100]}"
+                continue
             
             if response.status_code == 200 and "candidates" in res_data:
                 ai_reply = res_data["candidates"][0]["content"]["parts"][0]["text"]
                 return jsonify({"response": ai_reply})
             else:
-                last_error = res_data.get("error", {}).get("message", f"Unknown error with {model_name}")
+                last_error = res_data.get("error", {}).get("message", f"HTTP {response.status_code}")
                 continue    
                 
         except Exception as e:
