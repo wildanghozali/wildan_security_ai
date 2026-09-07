@@ -80,7 +80,8 @@ MODEL_NAMES = [
             <div class="w-16 h-16 bg-gray-900 rounded-2xl mx-auto flex items-center justify-center mb-4 border border-gray-800 shadow-lg">
                 <i class="fas fa-terminal text-2xl text-emerald-400"></i>
             </div>
-            <h2 class="text-2xl font-bold mb-2">Halo apa yang kamu butuh kan hari ini? </h2>
+            <h2 class="text-2xl font-bold mb-2">Halo, Siap Berburu Bug Hari Ini?</h2>
+
             <p class="text-gray-400 max-w-md mx-auto mb-6 text-sm">
                 Pilih mode kerja di bawah atau langsung ketik pertanyaan teknis keamanan siber, analisis payload, dan draf laporanmu.
             </p>
