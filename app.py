@@ -1,16 +1,16 @@
 import os
 from flask import Flask, render_template_string, request, jsonify
 import requests
+import base64
 
 app = Flask(__name__)
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 MODEL_NAMES = [
-    "gemini-3.7-flash",
-    "gemini-3.6-flash",
-    "gemini-3.5-flash",
     "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
 ]
 
 HTML_TEMPLATE = """
@@ -124,10 +124,21 @@ HTML_TEMPLATE = """
     <!-- Input Bar -->
     <div class="glass border-t border-gray-800 sticky bottom-0">
         <div class="max-w-4xl mx-auto px-4 py-4">
-            <form id="chat-form" class="flex gap-3">
+            <!-- File Preview Area -->
+            <div id="file-preview" class="hidden mb-2 flex items-center gap-2 bg-gray-900 p-2 rounded-lg border border-gray-700 w-fit text-xs">
+                <span id="file-name" class="text-emerald-400"></span>
+                <button type="button" onclick="removeFile()" class="text-gray-400 hover:text-red-400"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <form id="chat-form" class="flex gap-3 items-center">
+                <label for="image-input" class="cursor-pointer bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-300 px-3 py-3 rounded-xl transition-all flex items-center justify-center text-sm" title="Upload Screenshot / Foto">
+                    <i class="fas fa-image text-emerald-400"></i>
+                </label>
+                <input type="file" id="image-input" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+                
                 <input type="text" id="user-input" 
                     class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500 text-gray-100 placeholder-gray-500"
-                    placeholder="Ketik perintah atau analisis target..." autocomplete="off">
+                    placeholder="Ketik perintah atau analisis target / upload gambar..." autocomplete="off">
                 <button type="submit" 
                     class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-3 rounded-xl transition-all flex items-center gap-2 font-medium text-sm shadow-lg shadow-emerald-600/20">
                     <span>Kirim</span>
@@ -139,11 +150,37 @@ HTML_TEMPLATE = """
 
     <script>
         let currentMode = 'general';
+        let selectedFileBase64 = null;
+        let selectedFileType = null;
 
         function setMode(mode) {
             currentMode = mode;
             document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById('btn-' + mode).classList.add('active');
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Ambil base64 string murni tanpa header prefix
+                const base64String = e.target.result.split(',')[1];
+                selectedFileBase64 = base64String;
+                selectedFileType = file.type;
+
+                document.getElementById('file-name').innerText = file.name;
+                document.getElementById('file-preview').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeFile() {
+            selectedFileBase64 = null;
+            selectedFileType = null;
+            document.getElementById('image-input').value = '';
+            document.getElementById('file-preview').classList.add('hidden');
         }
 
         const chatForm = document.getElementById('chat-form');
@@ -156,17 +193,23 @@ HTML_TEMPLATE = """
             return text.replace(/\\*+/g, '');
         }
 
-        function appendMessage(sender, text) {
+        function appendMessage(sender, text, imgBase64 = null) {
             welcomeScreen.style.display = 'none';
             const isUser = sender === 'user';
             const div = document.createElement('div');
             div.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
             
+            let imgHtml = '';
+            if (imgBase64) {
+                imgHtml = `<div class="mb-2"><img src="data:image/jpeg;base64,${imgBase64}" class="max-h-48 rounded-lg border border-gray-700"></div>`;
+            }
+
             const processedText = isUser ? text : cleanText(text);
 
             div.innerHTML = `
                 <div class="max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${isUser ? 'bg-emerald-600 text-white rounded-tr-sm' : 'glass text-gray-200 rounded-tl-sm border border-gray-700/50'}">
                     <div class="font-bold text-xs opacity-75 mb-1">${isUser ? 'Wildan' : 'SecuAI Cyber Assistant'}</div>
+                    ${imgHtml}
                     <div class="whitespace-pre-wrap">${escapeHtml(processedText)}</div>
                 </div>
             `;
@@ -181,10 +224,20 @@ HTML_TEMPLATE = """
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const prompt = userInput.value.trim();
-            if (!prompt) return;
+            if (!prompt && !selectedFileBase64) return;
 
-            appendMessage('user', prompt);
+            const currentImg = selectedFileBase64;
+            appendMessage('user', prompt || '[Mengirim Gambar Analisis]', currentImg);
+            
             userInput.value = '';
+            const payloadData = {
+                prompt: prompt || 'Analisis gambar kerentanan atau bug bounty ini secara teknis.',
+                mode: currentMode,
+                image: selectedFileBase64,
+                image_type: selectedFileType
+            };
+
+            removeFile();
             typingIndicator.classList.remove('hidden');
             window.scrollTo(0, document.body.scrollHeight);
 
@@ -192,7 +245,7 @@ HTML_TEMPLATE = """
                 const res = await fetch('/ask-ai', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: prompt, mode: currentMode })
+                    body: JSON.stringify(payloadData)
                 });
                 const data = await res.json();
                 typingIndicator.classList.add('hidden');
@@ -221,9 +274,11 @@ def ask_ai():
     data = request.json
     user_prompt = data.get("prompt", "")
     mode = data.get("mode", "general")
+    image_base64 = data.get("image")
+    image_type = data.get("image_type", "image/jpeg")
 
-    if not user_prompt:
-        return jsonify({"error": "Prompt tidak boleh kosong!"}), 400
+    if not user_prompt and not image_base64:
+        return jsonify({"error": "Prompt atau gambar tidak boleh kosong!"}), 400
 
     system_instruction = (
         "Kamu adalah SecuAI, asisten AI expert di bidang Cyber Security, Penetration Testing, "
@@ -249,13 +304,23 @@ def ask_ai():
             "Langkah Reproduksi, Dampak, Remediasi, dan sertakan format permintaan sertifikat apresiasi."
         )
 
+    parts_list = [
+        {"text": f"{system_instruction}\\n\\nPertanyaan/Data Target: {user_prompt}"}
+    ]
+
+    if image_base64:
+        parts_list.append({
+            "inline_data": {
+                "mime_type": image_type,
+                "data": image_base64
+            }
+        })
+
     headers = {"Content-Type": "application/json"}
     payload = {
         "contents": [
             {
-                "parts": [
-                    {"text": f"{system_instruction}\\n\\nPertanyaan/Data Target: {user_prompt}"}
-                ]
+                "parts": parts_list
             }
         ]
     }
@@ -266,7 +331,7 @@ def ask_ai():
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
         
         try:
-            response = requests.post(url, json=payload, headers=headers, timeout=30)
+            response = requests.post(url, json=payload, headers=headers, timeout=45)
             res_data = response.json()
             
             if response.status_code == 200 and "candidates" in res_data:
