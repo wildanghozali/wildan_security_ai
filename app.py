@@ -8,6 +8,9 @@ app = Flask(__name__)
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 MODEL_NAMES = [
+    "gemini-3.7-flash",
+    "gemini-3.6-flash",
+    "gemini-3.5-flash",
     "gemini-2.5-flash",
     "gemini-2.0-flash",
     "gemini-1.5-flash",
@@ -165,7 +168,6 @@ HTML_TEMPLATE = """
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                // Ambil base64 string murni tanpa header prefix
                 const base64String = e.target.result.split(',')[1];
                 selectedFileBase64 = base64String;
                 selectedFileType = file.type;
