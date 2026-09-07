@@ -1,12 +1,12 @@
-import os
+ import os
 from flask import Flask, render_template_string, request, jsonify
 import requests
 
 app = Flask(__name__)
+application = app
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
-# Menggunakan model aktif terbaru yang stabil
 MODEL_NAMES = [
     "gemini-2.5-flash",
     "gemini-3.7-flash",
@@ -241,7 +241,6 @@ HTML_TEMPLATE = """
 def index():
     return render_template_string(HTML_TEMPLATE)
 
-@app.route("/ask-api", methods=["POST"]) # Kompatibilitas endpoint opsional
 @app.route("/ask-ai", methods=["POST"])
 def ask_ai():
     data = request.json
@@ -290,7 +289,7 @@ def ask_ai():
             try:
                 res_data = response.json()
             except Exception:
-                last_error = `HTTP {response.status_code}: {response.text[:100]}`
+                last_error = f"HTTP {response.status_code}: {response.text[:100]}"
                 continue
             
             if response.status_code == 200 and "candidates" in res_data:
