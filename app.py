@@ -7,9 +7,9 @@ app = Flask(__name__)
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 MODEL_NAMES = [
-    "gemini-2.5-flash",
-    "gemini-1.5-flash",
+    "models/gemini-2.5-flash",
 ]
+
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
