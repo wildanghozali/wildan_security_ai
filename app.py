@@ -1,7 +1,6 @@
 import os
 from flask import Flask, render_template_string, request, jsonify
 import requests
-import base64
 
 app = Flask(__name__)
 
@@ -12,6 +11,7 @@ MODEL_NAMES = [
     "gemini-2.0-flash",
 ]
 
+HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -81,7 +81,6 @@ MODEL_NAMES = [
                 <i class="fas fa-terminal text-2xl text-emerald-400"></i>
             </div>
             <h2 class="text-2xl font-bold mb-2">Halo, Siap Berburu Bug Hari Ini?</h2>
-
             <p class="text-gray-400 max-w-md mx-auto mb-6 text-sm">
                 Pilih mode kerja di bawah atau langsung ketik pertanyaan teknis keamanan siber, analisis payload, dan draf laporanmu.
             </p>
@@ -206,7 +205,7 @@ MODEL_NAMES = [
 
             div.innerHTML = `
                 <div class="max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${isUser ? 'bg-emerald-600 text-white rounded-tr-sm' : 'glass text-gray-200 rounded-tl-sm border border-gray-700/50'}">
-                    <div class="font-bold text-xs opacity-75 mb-1">${isUser ? 'Wildan' : 'SecuAI Cyber Assistant'}</div>
+                    <div class="font-bold text-xs opacity-75 mb-1">${isUser ? 'Anda' : 'SecuAI Cyber Assistant'}</div>
                     ${imgHtml}
                     <div class="whitespace-pre-wrap">${escapeHtml(processedText)}</div>
                 </div>
@@ -251,7 +250,7 @@ MODEL_NAMES = [
                 if (data.error) {
                     appendMessage('ai', 'Error: ' + data.error);
                 } else {
-                    appendMessage('ai', data.response + (data.model_used ? `\\n\\n[Model: ${data.model_used}]` : ''));
+                    appendMessage('ai', data.response);
                 }
             } catch (err) {
                 typingIndicator.classList.add('hidden');
@@ -280,12 +279,7 @@ def ask_ai():
 
     system_instruction = (
         "Kamu adalah SecuAI, asisten AI expert di bidang Cyber Security, Penetration Testing, "
-        "dan Bug Bounty yang diciptakan oleh M. Wildan Alghozali (asal Sampit, Central Kalimantan, "
-        "pelajar MAN 1 Kotawaringin Timur). Jika ada yang bertanya mengenai pembuat atau prestasimu, "
-        "jelaskan bahwa penciptamu adalah M. Wildan Alghozali, seorang independent security researcher "
-        "yang memiliki prestasi melaporkan kerentanan sistem ke berbagai instansi pemerintah seperti LKPP, "
-        "Kabupaten Blitar (mendapat sertifikat apresiasi), Kabupaten Tasikmalaya, dan Provinsi Riau. "
-        "Berikan analisis teknis yang tajam, solusi mitigasi, serta panduan keamanan yang profesional. "
+        "dan Bug Bounty. Berikan analisis teknis yang tajam, solusi mitigasi, serta panduan keamanan yang profesional. "
         "JANGAN PERNAH gunakan tanda bintang atau format markdown apapun di dalam teks jawabanmu agar hasilnya bersih."
     )
 
@@ -303,7 +297,7 @@ def ask_ai():
         )
 
     parts_list = [
-        {"text": f"{system_instruction}\\n\\nPertanyaan/Data Target: {user_prompt}"}
+        {"text": f"{system_instruction}\n\nPertanyaan/Data Target: {user_prompt}"}
     ]
 
     if image_base64:
@@ -334,7 +328,7 @@ def ask_ai():
             
             if response.status_code == 200 and "candidates" in res_data:
                 ai_reply = res_data["candidates"][0]["content"]["parts"][0]["text"]
-                return jsonify({"response": ai_reply, "model_used": model_name})
+                return jsonify({"response": ai_reply})
             else:
                 last_error = res_data.get("error", {}).get("message", f"Unknown error with {model_name}")
                 continue    
