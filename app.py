@@ -18,7 +18,7 @@ HTML_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecuAI - Cyber Security Assistant</title>
+    <title>EcoNexus AI - General Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -26,9 +26,9 @@ HTML_TEMPLATE = """
         body { font-family: 'Inter', sans-serif; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
         .glass {
-            background: rgba(17, 24, 39, 0.85);
+            background: rgba(6, 78, 59, 0.25);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(75, 85, 99, 0.3);
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
         .typing-dot { animation: typing 1.4s infinite ease-in-out both; }
         .typing-dot:nth-child(1) { animation-delay: -0.32s; }
@@ -38,36 +38,31 @@ HTML_TEMPLATE = """
             40% { transform: scale(1); }
         }
         pre {
-            background: #0f172a;
+            background: #022c22;
             padding: 1rem;
             border-radius: 0.5rem;
             overflow-x: auto;
-            border: 1px solid #334155;
+            border: 1px solid #065f46;
             margin: 0.5rem 0;
         }
         code {
             font-family: 'JetBrains Mono', monospace;
-            color: #34d399;
-        }
-        .mode-btn.active {
-            background: rgba(16, 185, 129, 0.2);
-            border-color: rgba(16, 185, 129, 0.6);
-            color: #34d399;
+            color: #6ee7b7;
         }
     </style>
 </head>
 <body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
 
     <!-- Header -->
-    <header class="glass sticky top-0 z-50 border-b border-gray-800">
+    <header class="glass sticky top-0 z-50 border-b border-emerald-900/50">
         <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center border border-emerald-500/30">
-                    <i class="fas fa-shield-halved text-emerald-400 text-lg"></i>
+                <div class="w-10 h-10 bg-emerald-600/20 rounded-lg flex items-center justify-center border border-emerald-500/40">
+                    <i class="fas fa-leaf text-emerald-400 text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg tracking-tight">SecuAI Asisten</h1>
-                    <p class="text-xs text-gray-400">Bug Hunter & Pentest Edition</p>
+                    <h1 class="font-bold text-lg tracking-tight text-emerald-100">EcoNexus AI</h1>
+                    <p class="text-xs text-emerald-400/80">Personal Assistant</p>
                 </div>
             </div>
         </div>
@@ -77,27 +72,14 @@ HTML_TEMPLATE = """
     <main class="flex-1 max-w-4xl mx-auto w-full px-4 py-6 flex flex-col">
         
         <!-- Welcome Screen -->
-        <div id="welcome" class="text-center py-8">
-            <div class="w-16 h-16 bg-gray-900 rounded-2xl mx-auto flex items-center justify-center mb-4 border border-gray-800 shadow-lg">
-                <i class="fas fa-terminal text-2xl text-emerald-400"></i>
+        <div id="welcome" class="text-center py-12">
+            <div class="w-16 h-16 bg-emerald-950/60 rounded-2xl mx-auto flex items-center justify-center mb-4 border border-emerald-800/60 shadow-lg">
+                <i class="fas fa-seedling text-2xl text-emerald-400"></i>
             </div>
-            <h2 class="text-2xl font-bold mb-2">Halo wildan aku siap menjadi asisten Cyber security mu</h2>
+            <h2 class="text-2xl font-bold mb-2">Halo! Ada yang bisa EcoNexus bantu hari ini?</h2>
             <p class="text-gray-400 max-w-md mx-auto mb-6 text-sm">
-                Pilih mode kerja di bawah atau langsung ketik pertanyaan teknis keamanan siber, analisis payload, dan draf laporanmu.
+                Tanyakan apa saja, mulai dari membuat teks, belajar, menerjemahkan bahasa, hingga menganalisis gambar.
             </p>
-
-            <!-- Mode Selector -->
-            <div class="flex justify-center gap-2 mb-6 flex-wrap">
-                <button onclick="setMode('general')" id="btn-general" class="mode-btn active px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 text-sm transition-all">
-                    <i class="fas fa-comments mr-1"></i> General
-                </button>
-                <button onclick="setMode('exploit')" id="btn-exploit" class="mode-btn px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 text-sm transition-all">
-                    <i class="fas fa-bug mr-1"></i> Exploit / PoC
-                </button>
-                <button onclick="setMode('report')" id="btn-report" class="mode-btn px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 text-sm transition-all">
-                    <i class="fas fa-file-shield mr-1"></i> Vulnerability Report
-                </button>
-            </div>
         </div>
 
         <!-- Chat History -->
@@ -106,14 +88,14 @@ HTML_TEMPLATE = """
         <!-- Typing Indicator -->
         <div id="typing" class="hidden py-2">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-emerald-500/20 rounded-full flex items-center justify-center border border-emerald-500/30">
-                    <i class="fas fa-shield-halved text-emerald-400 text-xs"></i>
+                <div class="w-8 h-8 bg-emerald-600/20 rounded-full flex items-center justify-center border border-emerald-500/40">
+                    <i class="fas fa-leaf text-emerald-400 text-xs"></i>
                 </div>
                 <div class="glass px-4 py-3 rounded-2xl rounded-tl-md">
                     <div class="flex gap-1">
-                        <div class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
-                        <div class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
-                        <div class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+                        <div class="w-2 h-2 bg-emerald-400 rounded-full typing-dot"></div>
+                        <div class="w-2 h-2 bg-emerald-400 rounded-full typing-dot"></div>
+                        <div class="w-2 h-2 bg-emerald-400 rounded-full typing-dot"></div>
                     </div>
                 </div>
             </div>
@@ -121,25 +103,25 @@ HTML_TEMPLATE = """
     </main>
 
     <!-- Input Bar -->
-    <div class="glass border-t border-gray-800 sticky bottom-0">
+    <div class="glass border-t border-emerald-900/50 sticky bottom-0">
         <div class="max-w-4xl mx-auto px-4 py-4">
             <!-- File Preview Area -->
-            <div id="file-preview" class="hidden mb-2 flex items-center gap-2 bg-gray-900 p-2 rounded-lg border border-gray-700 w-fit text-xs">
+            <div id="file-preview" class="hidden mb-2 flex items-center gap-2 bg-gray-900 p-2 rounded-lg border border-emerald-800/60 w-fit text-xs">
                 <span id="file-name" class="text-emerald-400"></span>
                 <button type="button" onclick="removeFile()" class="text-gray-400 hover:text-red-400"><i class="fas fa-times"></i></button>
             </div>
             
             <form id="chat-form" class="flex gap-3 items-center">
-                <label for="image-input" class="cursor-pointer bg-gray-900 hover:bg-gray-800 border border-gray-700 text-gray-300 px-3 py-3 rounded-xl transition-all flex items-center justify-center text-sm" title="Upload Screenshot / Foto">
+                <label for="image-input" class="cursor-pointer bg-gray-900 hover:bg-gray-800 border border-emerald-800/60 text-gray-300 px-3 py-3 rounded-xl transition-all flex items-center justify-center text-sm" title="Upload Gambar">
                     <i class="fas fa-image text-emerald-400"></i>
                 </label>
                 <input type="file" id="image-input" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
                 
                 <input type="text" id="user-input" 
-                    class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500 text-gray-100 placeholder-gray-500"
-                    placeholder="Ketik perintah atau analisis target / upload gambar..." autocomplete="off">
+                    class="flex-1 bg-gray-900 border border-emerald-800/60 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500 text-gray-100 placeholder-gray-500"
+                    placeholder="Ketik pesan atau pertanyaanmu di sini..." autocomplete="off">
                 <button type="submit" 
-                    class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-3 rounded-xl transition-all flex items-center gap-2 font-medium text-sm shadow-lg shadow-emerald-600/20">
+                    class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-3 rounded-xl transition-all flex items-center gap-2 font-medium text-sm shadow-lg shadow-emerald-900/40">
                     <span>Kirim</span>
                     <i class="fas fa-paper-plane text-xs"></i>
                 </button>
@@ -148,15 +130,8 @@ HTML_TEMPLATE = """
     </div>
 
     <script>
-        let currentMode = 'general';
         let selectedFileBase64 = null;
         let selectedFileType = null;
-
-        function setMode(mode) {
-            currentMode = mode;
-            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('btn-' + mode).classList.add('active');
-        }
 
         function handleFileSelect(event) {
             const file = event.target.files[0];
@@ -199,14 +174,14 @@ HTML_TEMPLATE = """
             
             let imgHtml = '';
             if (imgBase64) {
-                imgHtml = `<div class="mb-2"><img src="data:image/jpeg;base64,${imgBase64}" class="max-h-48 rounded-lg border border-gray-700"></div>`;
+                imgHtml = `<div class="mb-2"><img src="data:image/jpeg;base64,${imgBase64}" class="max-h-48 rounded-lg border border-emerald-800/50"></div>`;
             }
 
             const processedText = isUser ? text : cleanText(text);
 
             div.innerHTML = `
-                <div class="max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${isUser ? 'bg-emerald-600 text-white rounded-tr-sm' : 'glass text-gray-200 rounded-tl-sm border border-gray-700/50'}">
-                    <div class="font-bold text-xs opacity-75 mb-1">${isUser ? 'Anda' : 'SecuAI Cyber Assistant'}</div>
+                <div class="max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${isUser ? 'bg-emerald-600 text-white rounded-tr-sm' : 'glass text-gray-200 rounded-tl-sm border border-emerald-800/40'}">
+                    <div class="font-bold text-xs opacity-75 mb-1">${isUser ? 'Anda' : 'EcoNexus AI'}</div>
                     ${imgHtml}
                     <div class="whitespace-pre-wrap">${escapeHtml(processedText)}</div>
                 </div>
@@ -225,12 +200,11 @@ HTML_TEMPLATE = """
             if (!prompt && !selectedFileBase64) return;
 
             const currentImg = selectedFileBase64;
-            appendMessage('user', prompt || '[Mengirim Gambar Analisis]', currentImg);
+            appendMessage('user', prompt || '[Mengirim Gambar]', currentImg);
             
             userInput.value = '';
             const payloadData = {
-                prompt: prompt || 'Analisis gambar kerentanan atau bug bounty ini secara teknis.',
-                mode: currentMode,
+                prompt: prompt || 'Tolong jelaskan gambar ini.',
                 image: selectedFileBase64,
                 image_type: selectedFileType
             };
@@ -267,11 +241,11 @@ HTML_TEMPLATE = """
 def index():
     return render_template_string(HTML_TEMPLATE)
 
+@app.route("/ask-api", methods=["POST"]) # Kompatibilitas endpoint opsional
 @app.route("/ask-ai", methods=["POST"])
 def ask_ai():
     data = request.json
     user_prompt = data.get("prompt", "")
-    mode = data.get("mode", "general")
     image_base64 = data.get("image")
     image_type = data.get("image_type", "image/jpeg")
 
@@ -279,26 +253,13 @@ def ask_ai():
         return jsonify({"error": "Prompt atau gambar tidak boleh kosong!"}), 400
 
     system_instruction = (
-        "Kamu adalah SecuAI, asisten AI expert di bidang Cyber Security, Penetration Testing, "
-        "dan Bug Bounty. Berikan analisis teknis yang tajam, solusi mitigasi, serta panduan keamanan yang profesional. "
+        "Kamu adalah EcoNexus AI, asisten virtual umum yang cerdas, ramah, dan membantu. "
+        "Berikan jawaban yang jelas, informatif, dan akurat untuk berbagai macam pertanyaan. "
         "JANGAN PERNAH gunakan tanda bintang atau format markdown apapun di dalam teks jawabanmu agar hasilnya bersih."
     )
 
-    if mode == "exploit":
-        system_instruction += (
-            " Pengguna meminta analisis eksploitasi. Berikan langkah-langkah teknis, "
-            "payload contoh untuk edukasi, dan teknik mitigasi. "
-            "Tekankan bahwa eksploitasi hanya boleh dilakukan pada sistem yang memiliki izin tertulis."
-        )
-    elif mode == "report":
-        system_instruction += (
-            " Pengguna meminta draf laporan kerentanan. "
-            "Buat laporan formal lengkap dengan Judul Temuan, Severity, Deskripsi, "
-            "Langkah Reproduksi, Dampak, Remediasi, dan sertakan format permintaan sertifikat apresiasi."
-        )
-
     parts_list = [
-        {"text": f"{system_instruction}\n\nPertanyaan/Data Target: {user_prompt}"}
+        {"text": f"{system_instruction}\n\nPertanyaan: {user_prompt}"}
     ]
 
     if image_base64:
@@ -329,7 +290,7 @@ def ask_ai():
             try:
                 res_data = response.json()
             except Exception:
-                last_error = f"HTTP {response.status_code}: {response.text[:100]}"
+                last_error = `HTTP {response.status_code}: {response.text[:100]}`
                 continue
             
             if response.status_code == 200 and "candidates" in res_data:
